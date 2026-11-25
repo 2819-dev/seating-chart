@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Seating Planner</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3a5f'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='white' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='5.5' r='2.5' fill='white'/%3E%3Ccircle cx='16' cy='26.5' r='2.5' fill='white'/%3E%3Ccircle cx='5.5' cy='16' r='2.5' fill='white'/%3E%3Ccircle cx='26.5' cy='16' r='2.5' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><circle cx="16" cy="16" r="6" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="5.5" r="2.5" fill="#fff"/><circle cx="16" cy="26.5" r="2.5" fill="#fff"/><circle cx="5.5" cy="16" r="2.5" fill="#fff"/><circle cx="26.5" cy="16" r="2.5" fill="#fff"/></svg>
+      <span>Seating Planner</span>
+    </div>
+    <div class="toolbar">
+      <div class="group">
+        <button class="icon-btn" id="btn-undo" title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+        <button class="icon-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)"><svg viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+      </div>
+      <div class="group">
+        <button class="icon-btn" id="btn-zoom-out" title="Zoom out"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+        <button class="zoom-label" id="btn-zoom-fit" title="Fit to screen">100%</button>
+        <button class="icon-btn" id="btn-zoom-in" title="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+      <div class="group">
+        <button class="icon-btn toggle" id="btn-grid" title="Snap to grid"><svg viewBox="0 0 24 24"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg></button>
+      </div>
+      <div class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="search" type="search" placeholder="Find a guest…" autocomplete="off">
+      </div>
+    </div>
+    <div class="actions">
+      <span class="saved" id="saved">Saved</span>
+      <div class="menu-wrap">
+        <button class="btn ghost" id="btn-more">File <svg viewBox="0 0 24 24" class="chev"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="menu" id="menu-more" hidden>
+          <button data-act="export">Export backup (.json)</button>
+          <button data-act="import">Import backup…</button>
+          <hr>
+          <button data-act="clear-names">Clear all guest names</button>
+        </div>
+      </div>
+      <button class="btn primary" id="btn-print"><svg viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>Print</button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <section>
+      <div class="section-head">
+        <h3>Charts</h3>
+        <button class="icon-btn sm" id="btn-new-chart" title="New chart"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+      <ul class="chart-list" id="chart-list"></ul>
+    </section>
+    <section>
+      <div class="section-head"><h3>Add to chart</h3></div>
+      <div class="palette">
+        <button data-add="round"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="8" class="t"/><circle cx="20" cy="6" r="3"/><circle cx="20" cy="34" r="3"/><circle cx="6" cy="20" r="3"/><circle cx="34" cy="20" r="3"/><circle cx="10" cy="10" r="3"/><circle cx="30" cy="30" r="3"/><circle cx="30" cy="10" r="3"/><circle cx="10" cy="30" r="3"/></svg><span>Round table</span></button>
+        <button data-add="rect"><svg viewBox="0 0 40 40"><rect x="7" y="14" width="26" height="12" rx="1.5" class="t"/><circle cx="12" cy="8" r="3"/><circle cx="20" cy="8" r="3"/><circle cx="28" cy="8" r="3"/><circle cx="12" cy="32" r="3"/><circle cx="20" cy="32" r="3"/><circle cx="28" cy="32" r="3"/></svg><span>Long table</span></button>
+        <button data-add="row"><svg viewBox="0 0 40 40"><circle cx="6" cy="20" r="3"/><circle cx="14" cy="20" r="3"/><circle cx="22" cy="20" r="3"/><circle cx="30" cy="20" r="3"/><circle cx="38" cy="20" r="0"/></svg><span>Row of seats</span></button>
+        <button data-add="seat"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="5"/></svg><span>Single seat</span></button>
+        <button data-add="area"><svg viewBox="0 0 40 40"><rect x="5" y="11" width="30" height="18" rx="2" class="a"/></svg><span>Area / stage</span></button>
+        <button data-add="text"><svg viewBox="0 0 40 40"><path d="M11 12h18M20 12v17" class="tx"/></svg><span>Text label</span></button>
+      </div>
+    </section>
+    <section class="tips">
+      <h3>Tips</h3>
+      <ul>
+        <li>Drag items to move them.</li>
+        <li>Double‑click a seat to type a name.</li>
+        <li><kbd>Del</kbd> remove · <kbd>Ctrl</kbd>+<kbd>D</kbd> duplicate</li>
+        <li>Arrow keys nudge · <kbd>R</kbd> rotate</li>
+      </ul>
+    </section>
+  </aside>
+
+  <main class="stage" id="stage">
+    <div class="paper-wrap" id="paper-wrap"></div>
+  </main>
+
+  <aside class="inspector" id="inspector"></aside>
+</div>
+
+<div class="modal-backdrop" id="print-modal" hidden>
+  <div class="modal" role="dialog" aria-labelledby="print-title">
+    <h2 id="print-title">Print</h2>
+    <fieldset>
+      <label class="radio"><input type="radio" name="print-which" value="current" checked> <span>Current chart</span></label>
+      <label class="radio"><input type="radio" name="print-which" value="all"> <span>All charts <small id="print-count"></small></span></label>
+    </fieldset>
+    <label class="check"><input type="checkbox" id="print-index" checked> <span>Include alphabetical guest list</span></label>
+    <p class="hint">For best results, set margins to “None” and turn off headers &amp; footers in your browser’s print dialog.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" id="print-cancel">Cancel</button>
+      <button class="btn primary" id="print-go">Print</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="import-file" accept="application/json,.json" hidden>
+<div id="print-root"></div>
+<style id="print-style"></style>
+<script src="app.js"></script>
+</body>
+</html>

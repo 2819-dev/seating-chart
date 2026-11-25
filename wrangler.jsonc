@@ -1,0 +1,8 @@
+{
+  "name": "seating",
+  "main": "dist/worker.js",
+  "compatibility_date": "2026-11-01",
+  "account_id": "a464339742f7a2946723614c52cb9522",
+  "workers_dev": false,
+  "routes": [{ "pattern": "seating.rhfd.net", "custom_domain": true }]
+}
