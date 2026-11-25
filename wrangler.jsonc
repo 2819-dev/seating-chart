@@ -4,5 +4,7 @@
   "compatibility_date": "2026-11-01",
   "account_id": "a464339742f7a2946723614c52cb9522",
   "workers_dev": false,
-  "routes": [{ "pattern": "seating.rhfd.net", "custom_domain": true }]
+  "routes": [{ "pattern": "seating.rhfd.net", "custom_domain": true }],
+  "d1_databases": [{ "binding": "DB", "database_name": "seating-db", "database_id": "259f10e8-c29e-420f-bf2f-ba1eb5c7f381" }]
+  // Password is the APP_PASSWORD secret: `npx wrangler secret put APP_PASSWORD`
 }

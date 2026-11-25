@@ -76,6 +76,8 @@ svg { display: block; }
 
 .saved { color: var(--ink-3); font-size: 12px; transition: opacity .3s; opacity: 0; }
 .saved.show { opacity: 1; }
+.saved.warn { color: #b4372f; }
+.saved.ok::before { content: '✓ '; color: #2e7d4f; }
 
 .menu-wrap { position: relative; }
 .menu {
@@ -102,6 +104,7 @@ h3 { margin: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; le
 .chart-list li svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; flex-shrink: 0; }
 
 .palette { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.palette button:first-child { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 10px; font-size: 12.5px; }
 .palette button {
   border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 10px 6px 8px;
   display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-2); font-weight: 500;

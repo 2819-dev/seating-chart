@@ -24,7 +24,7 @@ const MARGIN = 0.5;
 const SNAP = 0.125;
 const SEAT_R = 0.17;
 const PX = 96; // screen px per inch at 100%
-const TYPE_NAMES = { round: 'Round table', rect: 'Long table', row: 'Row of seats', seat: 'Single seat', area: 'Area', text: 'Text label' };
+const TYPE_NAMES = { round: 'Round table', rect: 'Table', row: 'Row of seats', seat: 'Single seat', area: 'Area', text: 'Text label' };
 const COLORS = {
   ink: '#1b2430', ink2: '#4a5563', ink3: '#8a94a3',
   table: '#eef3f9', tableStroke: '#1f3a5f',
@@ -40,7 +40,7 @@ function newChart(name) {
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(STORE));
-    if (s && Array.isArray(s.charts) && s.charts.length) return s;
+    if (s && Array.isArray(s.charts) && s.charts.length) return migrate(s);
   } catch (e) { /* ignore */ }
   const c = newChart('Seating Chart');
   return { charts: [c], currentId: c.id };
@@ -60,13 +60,48 @@ function paperDims(c) {
   return c.orient === 'landscape' ? [p.h, p.w] : [p.w, p.h];
 }
 
+/* Saves go to localStorage immediately (instant, offline-safe) and to the
+   server shortly after (so charts follow you to any device). */
+let dirty = false, inflight = false, retryTimer = null;
+function setStatus(text, kind) {
+  const el = $('#saved');
+  el.textContent = text;
+  el.className = 'saved show ' + (kind || '');
+}
 function save() {
   try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* ignore */ }
-  const el = $('#saved');
-  el.textContent = 'All changes saved';
-  el.classList.add('show');
+  dirty = true;
+  setStatus('Saving…');
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => el.classList.remove('show'), 1400);
+  saveTimer = setTimeout(pushToServer, 600);
+}
+async function pushToServer() {
+  if (inflight) { clearTimeout(saveTimer); saveTimer = setTimeout(pushToServer, 300); return; }
+  if (!dirty) return;
+  inflight = true; dirty = false;
+  clearTimeout(retryTimer);
+  try {
+    const res = await fetch('/api/state', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(state), credentials: 'same-origin' });
+    if (res.status === 401) { location.href = '/'; return; }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!dirty) setStatus('All changes saved', 'ok');
+  } catch (e) {
+    dirty = true;
+    setStatus('Offline — will retry', 'warn');
+    retryTimer = setTimeout(pushToServer, 5000);
+  } finally {
+    inflight = false;
+  }
+}
+window.addEventListener('beforeunload', e => {
+  if (!dirty && !inflight) return;
+  try { fetch('/api/state', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(state), keepalive: true, credentials: 'same-origin' }); } catch (err) { /* ignore */ }
+  e.preventDefault(); e.returnValue = '';
+});
+function migrate(s) {
+  // Tables are rectangles: convert any older round tables.
+  s.charts.forEach(c => c.items.forEach(it => { if (it.type === 'round') { it.type = 'rect'; it.ends = false; } }));
+  return s;
 }
 function snapshot() {
   undoStack.push(JSON.stringify(state));
@@ -383,7 +418,6 @@ function freeSpot(it) {
 }
 function addItem(type) {
   const it = { id: uid(), type, x: 0, y: 0, rot: 0 };
-  if (type === 'round') { it.label = 'Table ' + nextTableNumber(); it.seats = Array(8).fill(''); }
   if (type === 'rect') { it.label = 'Table ' + nextTableNumber(); it.seats = Array(8).fill(''); it.ends = false; }
   if (type === 'row') { it.label = ''; it.seats = Array(6).fill(''); }
   if (type === 'seat') { it.seats = ['']; }
@@ -632,6 +666,7 @@ menu.addEventListener('click', e => {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   if (a === 'import') $('#import-file').click();
+  if (a === 'logout') { pushToServer().finally(() => { location.href = '/logout'; }); }
   if (a === 'clear-names') {
     if (confirm(`Clear every guest name in “${chart().name}”? You can undo this.`)) mutate(() => chart().items.forEach(it => { if (it.seats) it.seats = it.seats.map(() => ''); }));
   }
@@ -729,16 +764,40 @@ window.addEventListener('beforeprint', () => { if (!$('#print-root').innerHTML) 
 window.addEventListener('afterprint', () => { $('#print-root').innerHTML = ''; });
 
 /* ---------------- Boot ---------------- */
-if (!localStorage.getItem(STORE)) {
-  // A friendly starter layout on first visit
+function starterLayout() {
   const c = chart();
   c.title = 'Seating Chart';
   const [W] = paperDims(c);
   c.items.push({ id: uid(), type: 'area', x: W / 2, y: 1.75, rot: 0, label: 'Head Table Area', w: 4.5, h: 0.6 });
-  [[W / 2 - 3, 4], [W / 2, 4], [W / 2 + 3, 4], [W / 2 - 1.5, 6.5], [W / 2 + 1.5, 6.5]].forEach(([x, y], i) => {
-    c.items.push({ id: uid(), type: 'round', x, y, rot: 0, label: 'Table ' + (i + 1), seats: Array(8).fill('') });
+  [[W / 2 - 3, 3.9], [W / 2, 3.9], [W / 2 + 3, 3.9], [W / 2 - 1.5, 6.3], [W / 2 + 1.5, 6.3]].forEach(([x, y], i) => {
+    c.items.push({ id: uid(), type: 'rect', x, y, rot: 0, label: 'Table ' + (i + 1), seats: Array(8).fill(''), ends: false });
   });
-  save();
 }
-renderAll();
-requestAnimationFrame(fitZoom);
+async function boot() {
+  const hadLocal = !!localStorage.getItem(STORE);
+  renderAll();
+  requestAnimationFrame(fitZoom);
+  setStatus('Loading…');
+  try {
+    const res = await fetch('/api/state', { credentials: 'same-origin', cache: 'no-store' });
+    if (res.status === 401) { location.href = '/'; return; }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.state && Array.isArray(data.state.charts) && data.state.charts.length) {
+      state = migrate(data.state);
+      if (!state.charts.some(c => c.id === state.currentId)) state.currentId = state.charts[0].id;
+      try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* ignore */ }
+      sel = null; undoStack = []; redoStack = [];
+      renderAll(); fitZoom();
+      setStatus('All changes saved', 'ok');
+    } else {
+      // Nothing on the server yet: upload what this browser has (or a starter layout).
+      if (!hadLocal) { starterLayout(); renderAll(); }
+      save();
+    }
+  } catch (e) {
+    setStatus('Offline — changes kept on this device', 'warn');
+    if (!hadLocal) { starterLayout(); renderAll(); }
+  }
+}
+boot();

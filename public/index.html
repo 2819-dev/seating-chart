@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Seating Planner</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3a5f'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='white' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='5.5' r='2.5' fill='white'/%3E%3Ccircle cx='16' cy='26.5' r='2.5' fill='white'/%3E%3Ccircle cx='5.5' cy='16' r='2.5' fill='white'/%3E%3Ccircle cx='26.5' cy='16' r='2.5' fill='white'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f3a5f'/%3E%3Crect x='9' y='12' width='14' height='8' rx='1.5' fill='none' stroke='white' stroke-width='2.2'/%3E%3Ccircle cx='12' cy='7' r='2.2' fill='white'/%3E%3Ccircle cx='20' cy='7' r='2.2' fill='white'/%3E%3Ccircle cx='12' cy='25' r='2.2' fill='white'/%3E%3Ccircle cx='20' cy='25' r='2.2' fill='white'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
 <div id="app">
   <header class="topbar">
     <div class="brand">
-      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><circle cx="16" cy="16" r="6" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="16" cy="5.5" r="2.5" fill="#fff"/><circle cx="16" cy="26.5" r="2.5" fill="#fff"/><circle cx="5.5" cy="16" r="2.5" fill="#fff"/><circle cx="26.5" cy="16" r="2.5" fill="#fff"/></svg>
+      <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand)"/><rect x="9" y="12" width="14" height="8" rx="1.5" fill="none" stroke="#fff" stroke-width="2.2"/><circle cx="12" cy="7" r="2.2" fill="#fff"/><circle cx="20" cy="7" r="2.2" fill="#fff"/><circle cx="12" cy="25" r="2.2" fill="#fff"/><circle cx="20" cy="25" r="2.2" fill="#fff"/></svg>
       <span>Seating Planner</span>
     </div>
     <div class="toolbar">
@@ -45,6 +45,8 @@
           <button data-act="import">Import backup…</button>
           <hr>
           <button data-act="clear-names">Clear all guest names</button>
+          <hr>
+          <button data-act="logout">Sign out</button>
         </div>
       </div>
       <button class="btn primary" id="btn-print"><svg viewBox="0 0 24 24"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>Print</button>
@@ -62,8 +64,7 @@
     <section>
       <div class="section-head"><h3>Add to chart</h3></div>
       <div class="palette">
-        <button data-add="round"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="8" class="t"/><circle cx="20" cy="6" r="3"/><circle cx="20" cy="34" r="3"/><circle cx="6" cy="20" r="3"/><circle cx="34" cy="20" r="3"/><circle cx="10" cy="10" r="3"/><circle cx="30" cy="30" r="3"/><circle cx="30" cy="10" r="3"/><circle cx="10" cy="30" r="3"/></svg><span>Round table</span></button>
-        <button data-add="rect"><svg viewBox="0 0 40 40"><rect x="7" y="14" width="26" height="12" rx="1.5" class="t"/><circle cx="12" cy="8" r="3"/><circle cx="20" cy="8" r="3"/><circle cx="28" cy="8" r="3"/><circle cx="12" cy="32" r="3"/><circle cx="20" cy="32" r="3"/><circle cx="28" cy="32" r="3"/></svg><span>Long table</span></button>
+        <button data-add="rect"><svg viewBox="0 0 40 40"><rect x="7" y="14" width="26" height="12" rx="1.5" class="t"/><circle cx="12" cy="8" r="3"/><circle cx="20" cy="8" r="3"/><circle cx="28" cy="8" r="3"/><circle cx="12" cy="32" r="3"/><circle cx="20" cy="32" r="3"/><circle cx="28" cy="32" r="3"/></svg><span>Table</span></button>
         <button data-add="row"><svg viewBox="0 0 40 40"><circle cx="6" cy="20" r="3"/><circle cx="14" cy="20" r="3"/><circle cx="22" cy="20" r="3"/><circle cx="30" cy="20" r="3"/><circle cx="38" cy="20" r="0"/></svg><span>Row of seats</span></button>
         <button data-add="seat"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="5"/></svg><span>Single seat</span></button>
         <button data-add="area"><svg viewBox="0 0 40 40"><rect x="5" y="11" width="30" height="18" rx="2" class="a"/></svg><span>Area / stage</span></button>
